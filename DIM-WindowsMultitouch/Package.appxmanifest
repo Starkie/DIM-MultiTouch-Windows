@@ -30,7 +30,7 @@
   <Applications>
     <Application Id="App"
       Executable="$targetnametoken$.exe"
-      EntryPoint="DIM_WindowsMultitouch.App">
+      EntryPoint="Dim.MultiTouch.App">
       <uap:VisualElements
         DisplayName="DIM-WindowsMultitouch"
         Square150x150Logo="Assets\Square150x150Logo.png"

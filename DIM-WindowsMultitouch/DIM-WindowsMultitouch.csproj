@@ -7,8 +7,8 @@
     <ProjectGuid>{07429FD0-A712-43BE-A033-FC853407F575}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DIM_WindowsMultitouch</RootNamespace>
-    <AssemblyName>DIM-WindowsMultitouch</AssemblyName>
+    <RootNamespace>Dim.MultiTouch.App</RootNamespace>
+    <AssemblyName>Dim.MultiTouch.App</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.18362.0</TargetPlatformVersion>
