@@ -7,6 +7,16 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.BottomAppBar>
+        <CommandBar>
+            <CommandBar.Content>
+                <Grid />
+            </CommandBar.Content>
+            <AppBarButton HorizontalAlignment="Left" x:Name="AddButton" Icon="Add" Label="Add image..." />
+            <AppBarButton x:Name="SaveButton" Icon="Save" Label="Save collage" />
+            <AppBarButton x:Name="DeleteButton" Icon="Delete" Label="Delete all" />
+        </CommandBar>
+    </Page.BottomAppBar>
     <RelativePanel VerticalAlignment="Center" HorizontalAlignment="Center" Height="747" Width="1025">
         <Image x:Name="ForestPhoto" RelativePanel.Below="OceanPhoto" HorizontalAlignment="Center" Height="573" VerticalAlignment="Center" Width="673" Source="/Assets/forest.jpg" />
         <Image x:Name="OceanPhoto" Height="295" Width="495" Source="/Assets/ocean.jpg" RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False" d:LayoutRounding="Auto" />
