@@ -1,0 +1,21 @@
+<Page
+    x:Class="Dim.MultiTouch.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Dim.MultiTouch"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <RelativePanel x:Name="relativePanel">
+        <StackPanel x:Name="ImagePanel" Margin="20">
+            <Image x:Name="Photo" Source="/Assets/forest.jpg" MaxHeight="400" Holding="Photo_Holding" DoubleTapped="Photo_DoubleTapped" Tapped="Photo_Tapped" />
+        </StackPanel>
+        <StackPanel x:Name="EventsPanel" Margin="20" RelativePanel.RightOf="ImagePanel">
+            <ListView x:Name="EventsListView" Header="Touch Events">
+                <x:String>string</x:String>
+            </ListView>
+        </StackPanel>
+    </RelativePanel>
+</Page>
