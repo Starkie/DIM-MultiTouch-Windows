@@ -1,0 +1,13 @@
+<Page
+    x:Class="Dim.MultiTouch.App.Excercise3.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Exercise3"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <RelativePanel VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Image x:Name="Photo" HorizontalAlignment="Center" Height="573" VerticalAlignment="Center" Width="673" Source="/Assets/forest.jpg" />
+    </RelativePanel>
+</Page>
