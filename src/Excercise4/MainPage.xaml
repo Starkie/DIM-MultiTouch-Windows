@@ -1,0 +1,15 @@
+<Page
+    x:Class="Dim.MultiTouch.App.Excercise4.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Dim.MultiTouch.App.Excercise4"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <RelativePanel VerticalAlignment="Center" HorizontalAlignment="Center" Height="747" Width="1025">
+        <Image x:Name="ForestPhoto" RelativePanel.Below="OceanPhoto" HorizontalAlignment="Center" Height="573" VerticalAlignment="Center" Width="673" Source="/Assets/forest.jpg" />
+        <Image x:Name="OceanPhoto" Height="295" Width="495" Source="/Assets/ocean.jpg" RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False" d:LayoutRounding="Auto" />
+        <Image x:Name="DesertPhoto" RelativePanel.RightOf="OceanPhoto"  Height="399" Width="423" Source="/Assets/desert.jpg" />
+    </RelativePanel>
+</Page>
