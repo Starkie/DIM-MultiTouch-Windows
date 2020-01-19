@@ -1,4 +1,4 @@
-﻿namespace Dim.MultiTouch
+namespace Dim.MultiTouch
 {
     using System;
     using Windows.ApplicationModel;
@@ -10,13 +10,13 @@
     /// <summary>
     ///     Provides application-specific behavior to supplement the default Application class.
     /// </summary>
-    sealed partial class App : Application
+    public sealed partial class MultiTouchApp : Application
     {
         /// <summary>
         ///     Initializes the singleton application object. This is the first line of authored
         ///     code executed, and as such is the logical equivalent of main() or WinMain().
         /// </summary>
-        public App()
+        public MultiTouchApp()
         {
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
@@ -63,9 +63,9 @@
             }
         }
 
-        /// <summary> Invoked when Navigation to a certain page fails </summary>
-        /// <param name="sender"> The Frame which failed navigation </param>
-        /// <param name="e"> Details about the navigation failure </param>
+        /// <summary> Invoked when Navigation to a certain page fails. </summary>
+        /// <param name="sender"> The Frame which failed navigation. </param>
+        /// <param name="e"> Details about the navigation failure. </param>
         private void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
         {
             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
