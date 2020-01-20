@@ -30,6 +30,7 @@ namespace Dim.MultiTouch.Collage
             this.InitializeComponent();
 
             this.SaveButton.Click += new RoutedEventHandler(this.SaveClick_OnClickAsync);
+            this.AddButton.Click += new RoutedEventHandler(this.AddClick_OnClickAsync);
 
             this.images = new Dictionary<string, Image>();
             this.images[this.ForestPhoto.Name] = this.ForestPhoto;
@@ -40,22 +41,7 @@ namespace Dim.MultiTouch.Collage
 
             foreach (Image image in this.images.Values)
             {
-                image.ManipulationMode = ManipulationModes.Rotate
-                    | ManipulationModes.Scale
-                    | ManipulationModes.TranslateInertia
-                    | ManipulationModes.TranslateX
-                    | ManipulationModes.TranslateY;
-
-                image.ManipulationDelta +=
-                    new ManipulationDeltaEventHandler(this.Photo_ManipulationDelta);
-
-                // Create a transformation to be used to apply them to the image.
-                // Reference: https://github.com/microsoft/Windows-universal-samples/blob/master/Samples/BasicInput/cs/4-XAMLManipulations.xaml.cs
-                this.imagesTransforms[image.Name] = new CompositeTransform();
-                image.RenderTransform = this.imagesTransforms[image.Name];
-
-                // Set the transformation to affect the centre of the image.
-                image.RenderTransformOrigin = new Point(0.5, 0.5);
+                this.SetDefaultImageTransformation(image);
             }
         }
 
@@ -84,12 +70,6 @@ namespace Dim.MultiTouch.Collage
             return file;
         }
 
-        /// <summary>
-        ///     Saves the given <see cref="UIElement"/> as an image in the given file.
-        /// </summary>
-        /// <param name="uiElement"> The element to save. </param>
-        /// <param name="file"> The file where to save the image. </param>
-        /// <returns> A task that enables this method to be awaited. </returns>
         private static async Task SaveViewAsImageFileAsync(UIElement uiElement, StorageFile file)
         {
             // Render the current view to the target bitmap. Reference from: https://stackoverflow.com/questions/41354024/uwp-save-grid-as-png
@@ -116,6 +96,54 @@ namespace Dim.MultiTouch.Collage
             }
         }
 
+        private async void AddClick_OnClickAsync(object sender, RoutedEventArgs e)
+        {
+            IReadOnlyList<StorageFile> selectedImages = await ShowImageFileSelector();
+
+            foreach (var file in selectedImages)
+            {
+                using (var fileStream = await file.OpenReadAsync())
+                {
+                    BitmapImage bitmap = new BitmapImage();
+                    await bitmap.SetSourceAsync(fileStream);
+
+                    Image image = new Image();
+                    image.Name = Guid.NewGuid().ToString();
+                    image.Source = bitmap;
+                    image.Stretch = Stretch.Uniform;
+
+                    image.CenterPoint = this.CollageCanvas.CenterPoint;
+
+                    this.images[image.Name] = image;
+
+                    this.SetDefaultImageTransformation(image);
+
+                    this.CollageCanvas.Children.Add(image);
+                }
+            }
+
+            this.CollageCanvas.UpdateLayout();
+        }
+
+        private static async Task<IReadOnlyList<StorageFile>> ShowImageFileSelector()
+        {
+            // Ensure that the application is not snapped, to avoid errors.
+            // See: https://docs.microsoft.com/en-us/windows/uwp/files/quickstart-save-a-file-with-a-picker
+            bool unsnapped = (ApplicationView.Value != ApplicationViewState.Snapped) || ApplicationView.TryUnsnap();
+
+            FileOpenPicker fileOpenPicker = new FileOpenPicker();
+
+            // Image extension filters.
+            fileOpenPicker.FileTypeFilter.Add(".png");
+            fileOpenPicker.FileTypeFilter.Add(".jpg");
+            fileOpenPicker.FileTypeFilter.Add(".jpeg");
+
+            fileOpenPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+
+            IReadOnlyList<StorageFile> selectedImages = await fileOpenPicker.PickMultipleFilesAsync();
+            return selectedImages;
+        }
+
         /// <summary> Stores the current collage as photo in the disk. </summary>
         /// <param name="sender"> The Save button. </param>
         /// <param name="e"> The arguments regarding the click. </param>
@@ -130,6 +158,26 @@ namespace Dim.MultiTouch.Collage
             }
 
             await SaveViewAsImageFileAsync(this, file);
+        }
+
+        private void SetDefaultImageTransformation(Image image)
+        {
+            image.ManipulationMode = ManipulationModes.Rotate
+                                | ManipulationModes.Scale
+                                | ManipulationModes.TranslateInertia
+                                | ManipulationModes.TranslateX
+                                | ManipulationModes.TranslateY;
+
+            image.ManipulationDelta +=
+                new ManipulationDeltaEventHandler(this.Photo_ManipulationDelta);
+
+            // Create a transformation to be used to apply them to the image.
+            // Reference: https://github.com/microsoft/Windows-universal-samples/blob/master/Samples/BasicInput/cs/4-XAMLManipulations.xaml.cs
+            this.imagesTransforms[image.Name] = new CompositeTransform();
+            image.RenderTransform = this.imagesTransforms[image.Name];
+
+            // Set the transformation to affect the centre of the image.
+            image.RenderTransformOrigin = new Point(0.5, 0.5);
         }
 
         private void Photo_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)

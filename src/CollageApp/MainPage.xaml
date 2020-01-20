@@ -17,7 +17,7 @@
             <AppBarButton x:Name="DeleteButton" Icon="Delete" Label="Delete all" />
         </CommandBar>
     </Page.BottomAppBar>
-    <RelativePanel VerticalAlignment="Center" HorizontalAlignment="Center" Height="747" Width="1025">
+    <RelativePanel x:Name="CollageCanvas" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <Image x:Name="ForestPhoto" RelativePanel.Below="OceanPhoto" HorizontalAlignment="Center" Height="573" VerticalAlignment="Center" Width="673" Source="/Assets/forest.jpg" />
         <Image x:Name="OceanPhoto" Height="295" Width="495" Source="/Assets/ocean.jpg" RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False" d:LayoutRounding="Auto" />
         <Image x:Name="DesertPhoto" RelativePanel.RightOf="OceanPhoto"  Height="399" Width="423" Source="/Assets/desert.jpg" />
