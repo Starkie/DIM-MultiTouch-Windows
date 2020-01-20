@@ -163,10 +163,10 @@ namespace Dim.MultiTouch.Collage
         private void SetDefaultImageTransformation(Image image)
         {
             image.ManipulationMode = ManipulationModes.Rotate
-                                | ManipulationModes.Scale
-                                | ManipulationModes.TranslateInertia
-                                | ManipulationModes.TranslateX
-                                | ManipulationModes.TranslateY;
+                | ManipulationModes.Scale
+                | ManipulationModes.TranslateInertia
+                | ManipulationModes.TranslateX
+                | ManipulationModes.TranslateY;
 
             image.ManipulationDelta +=
                 new ManipulationDeltaEventHandler(this.Photo_ManipulationDelta);
@@ -178,6 +178,17 @@ namespace Dim.MultiTouch.Collage
 
             // Set the transformation to affect the centre of the image.
             image.RenderTransformOrigin = new Point(0.5, 0.5);
+
+            image.DoubleTapped += new DoubleTappedEventHandler(this.Image_DoubleTapped);
+        }
+
+        private void Image_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            // Delete the image when double taped.
+            Image image = sender as Image;
+            this.images[image.Name] = null;
+            this.imagesTransforms[image.Name] = null;
+            this.CollageCanvas.Children.Remove(image);
         }
 
         private void Photo_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
