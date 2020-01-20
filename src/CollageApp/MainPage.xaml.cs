@@ -62,7 +62,7 @@ namespace Dim.MultiTouch.Collage
             FileSavePicker savePicker = new FileSavePicker();
 
             savePicker.FileTypeChoices.Add("Image", new List<string>() { ".png" });
-            savePicker.SuggestedFileName = "Collage";
+            savePicker.SuggestedFileName = DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + "-Collage";
             savePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
 
             StorageFile file = await savePicker.PickSaveFileAsync();
