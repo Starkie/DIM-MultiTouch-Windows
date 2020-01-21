@@ -36,21 +36,22 @@ namespace Dim.MultiTouch.Collage
             this.DeleteButton.Click += new RoutedEventHandler(this.DeleteButton_OnClickAsync);
 
             this.images = new Dictionary<string, Image>();
-            this.images[this.ForestPhoto.Name] = this.ForestPhoto;
-            this.images[this.OceanPhoto.Name] = this.OceanPhoto;
-            this.images[this.DesertPhoto.Name] = this.DesertPhoto;
-
             this.imagesTransforms = new Dictionary<string, CompositeTransform>();
-
-            foreach (Image image in this.images.Values)
-            {
-                this.SetDefaultImageTransformation(image);
-            }
 
             // Do not render anything outside the canvas bounds.
             Rect r = new Rect(new Point(0, 0), new Point(this.CollageCanvas.MaxWidth, this.CollageCanvas.MaxHeight));
 
             this.CollageCanvas.Clip = new RectangleGeometry { Rect = r };
+
+            // Register the default images for the collage.
+            this.images[this.ForestPhoto.Name] = this.ForestPhoto;
+            this.images[this.OceanPhoto.Name] = this.OceanPhoto;
+            this.images[this.DesertPhoto.Name] = this.DesertPhoto;
+
+            foreach (Image image in this.images.Values)
+            {
+                this.SetDefaultImageConfiguration(image);
+            }
         }
 
         /// <summary>
@@ -116,9 +117,6 @@ namespace Dim.MultiTouch.Collage
             // Obtain the pixels from the rendered bitmap
             byte[] pixels = (await renderTargetBitmap.GetPixelsAsync()).ToArray();
 
-            // TODO: See how to save only the visible side of the canvas. Evitar que sea stretch y
-            // darle tamaño fijo?
-
             // Write the result as a PNG image.
             using (IRandomAccessStream fileStream = await file.OpenAsync(FileAccessMode.ReadWrite))
             {
@@ -162,7 +160,7 @@ namespace Dim.MultiTouch.Collage
 
                     this.images[image.Name] = image;
 
-                    this.SetDefaultImageTransformation(image);
+                    this.SetDefaultImageConfiguration(image);
 
                     this.CollageCanvas.Children.Add(image);
                 }
@@ -208,7 +206,11 @@ namespace Dim.MultiTouch.Collage
             await SaveViewAsImageFileAsync(this.CollageCanvas, file);
         }
 
-        private void SetDefaultImageTransformation(Image image)
+        /// <summary>
+        ///     Configures the given image, adding the default behaviour and event handlers.
+        /// </summary>
+        /// <param name="image"> The image to configure. </param>
+        private void SetDefaultImageConfiguration(Image image)
         {
             image.ManipulationMode = ManipulationModes.Rotate
                 | ManipulationModes.Scale
@@ -217,7 +219,7 @@ namespace Dim.MultiTouch.Collage
                 | ManipulationModes.TranslateY;
 
             image.ManipulationDelta +=
-                new ManipulationDeltaEventHandler(this.Photo_ManipulationDelta);
+                new ManipulationDeltaEventHandler(this.Image_ManipulationDelta);
 
             // Create a transformation to be used to apply them to the image.
             // Reference: https://github.com/microsoft/Windows-universal-samples/blob/master/Samples/BasicInput/cs/4-XAMLManipulations.xaml.cs
@@ -230,6 +232,12 @@ namespace Dim.MultiTouch.Collage
             image.DoubleTapped += new DoubleTappedEventHandler(this.Image_DoubleTapped);
         }
 
+        /// <summary>
+        ///     When double tapped, an image is brought to the front of the canvas. Superposing
+        ///     itself to the rest of images.
+        /// </summary>
+        /// <param name="sender"> The image. </param>
+        /// <param name="e"> The event arguments. </param>
         private void Image_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
             // Move the image to front when double taped.
@@ -243,11 +251,16 @@ namespace Dim.MultiTouch.Collage
             }
         }
 
-        private void Photo_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
+        /// <summary>
+        ///     Handles the transformation events of an image: scale up, rotation and translation.
+        /// </summary>
+        /// <param name="sender"> The image. </param>
+        /// <param name="e"> The event arguments. </param>
+        private void Image_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
         {
             Image image = sender as Image;
 
-            // Apply the delta transformations to the Photo.
+            // Apply the delta transformations to the Image.
             this.imagesTransforms[image.Name].Rotation += e.Delta.Rotation;
 
             this.imagesTransforms[image.Name].ScaleX *= e.Delta.Scale;
