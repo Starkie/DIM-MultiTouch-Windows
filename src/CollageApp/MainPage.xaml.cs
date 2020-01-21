@@ -136,6 +136,12 @@ namespace Dim.MultiTouch.Collage
             }
         }
 
+        /// <summary>
+        ///     Event handler for the <see cref="DeleteButton"/>. Prompts the user to add one or
+        ///     more images to the collage.
+        /// </summary>
+        /// <param name="sender"> The button. </param>
+        /// <param name="e"> The event arguments. </param>
         private async void AddClick_OnClickAsync(object sender, RoutedEventArgs e)
         {
             IReadOnlyList<StorageFile> selectedImages = await ShowImageFileSelector();
@@ -165,6 +171,8 @@ namespace Dim.MultiTouch.Collage
             this.CollageCanvas.UpdateLayout();
         }
 
+        /// <summary> Shows the file selector to pick one or more images. </summary>
+        /// <returns> The collection of selected files, if any. </returns>
         private static async Task<IReadOnlyList<StorageFile>> ShowImageFileSelector()
         {
             // Ensure that the application is not snapped, to avoid errors.
