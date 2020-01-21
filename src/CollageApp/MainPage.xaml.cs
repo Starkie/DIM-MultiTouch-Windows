@@ -27,15 +27,18 @@ namespace Dim.MultiTouch.Collage
         {
             this.InitializeComponent();
 
+            // Initialize the canvas state collections.
+            this.images = new Dictionary<string, Image>();
+            this.imagesTransforms = new Dictionary<string, CompositeTransform>();
+
+            // Initialize the photo services.
             this.saveAsPhotoService = new SavePhotoService();
             this.loadPhotoService = new LoadPhotoService();
 
+            // Register the buttons event handlers.
             this.SaveButton.Click += new RoutedEventHandler(this.SaveClick_OnClickAsync);
             this.AddButton.Click += new RoutedEventHandler(this.AddClick_OnClickAsync);
             this.DeleteButton.Click += new RoutedEventHandler(this.DeleteButton_OnClickAsync);
-
-            this.images = new Dictionary<string, Image>();
-            this.imagesTransforms = new Dictionary<string, CompositeTransform>();
 
             // Do not render anything outside the canvas bounds.
             Rect r = new Rect(new Point(0, 0), new Point(this.CollageCanvas.MaxWidth, this.CollageCanvas.MaxHeight));
@@ -54,32 +57,37 @@ namespace Dim.MultiTouch.Collage
         }
 
         /// <summary>
-        ///     Event handler for the <see cref="DeleteButton"/>. Prompts the user to delete all the
-        ///     images of the collage.
+        ///     Configures the given image, adding the default behaviour and event handlers.
         /// </summary>
-        /// <param name="sender"> The button. </param>
-        /// <param name="e"> The event arguments. </param>
-        private async void DeleteButton_OnClickAsync(object sender, RoutedEventArgs e)
+        /// <param name="image"> The image to configure. </param>
+        private void SetDefaultImageConfiguration(Image image)
         {
-            ContentDialog deleteCollageDialog = new ContentDialog
-            {
-                Title = "Delete current collage",
-                Content = "Are you sure you want to delete the current collage?",
-                CloseButtonText = "No",
-                PrimaryButtonText = "Yes",
-            };
+            image.ManipulationMode = ManipulationModes.Rotate
+                | ManipulationModes.Scale
+                | ManipulationModes.TranslateInertia
+                | ManipulationModes.TranslateX
+                | ManipulationModes.TranslateY;
 
-            ContentDialogResult contentDialogResult = await deleteCollageDialog.ShowAsync();
+            image.ManipulationDelta +=
+                new ManipulationDeltaEventHandler(this.Image_ManipulationDelta);
 
-            if (contentDialogResult != ContentDialogResult.Primary)
-            {
-                return;
-            }
+            // Create a transformation to be used to apply them to the image.
+            // Reference: https://github.com/microsoft/Windows-universal-samples/blob/master/Samples/BasicInput/cs/4-XAMLManipulations.xaml.cs
+            this.imagesTransforms[image.Name] = new CompositeTransform();
+            image.RenderTransform = this.imagesTransforms[image.Name];
 
-            // Clear the images from the canvas.
-            this.images.Clear();
-            this.imagesTransforms.Clear();
-            this.CollageCanvas.Children.Clear();
+            // Set the transformation to affect the centre of the image.
+            image.RenderTransformOrigin = new Point(0.5, 0.5);
+
+            image.DoubleTapped += new DoubleTappedEventHandler(this.Image_DoubleTapped);
+        }
+
+        /// <summary> Stores the current collage as photo in the disk. </summary>
+        /// <param name="sender"> The Save button. </param>
+        /// <param name="e"> The arguments regarding the click. </param>
+        private async void SaveClick_OnClickAsync(object sender, RoutedEventArgs e)
+        {
+            await this.saveAsPhotoService.SaveUiElementToFile(this.CollageCanvas);
         }
 
         /// <summary>
@@ -111,38 +119,33 @@ namespace Dim.MultiTouch.Collage
             this.CollageCanvas.UpdateLayout();
         }
 
-        /// <summary> Stores the current collage as photo in the disk. </summary>
-        /// <param name="sender"> The Save button. </param>
-        /// <param name="e"> The arguments regarding the click. </param>
-        private async void SaveClick_OnClickAsync(object sender, RoutedEventArgs e)
-        {
-            await this.saveAsPhotoService.SaveUiElementToFile(this.CollageCanvas);
-        }
-
         /// <summary>
-        ///     Configures the given image, adding the default behaviour and event handlers.
+        ///     Event handler for the <see cref="DeleteButton"/>. Prompts the user to delete all the
+        ///     images of the collage.
         /// </summary>
-        /// <param name="image"> The image to configure. </param>
-        private void SetDefaultImageConfiguration(Image image)
+        /// <param name="sender"> The button. </param>
+        /// <param name="e"> The event arguments. </param>
+        private async void DeleteButton_OnClickAsync(object sender, RoutedEventArgs e)
         {
-            image.ManipulationMode = ManipulationModes.Rotate
-                | ManipulationModes.Scale
-                | ManipulationModes.TranslateInertia
-                | ManipulationModes.TranslateX
-                | ManipulationModes.TranslateY;
+            ContentDialog deleteCollageDialog = new ContentDialog
+            {
+                Title = "Delete current collage",
+                Content = "Are you sure you want to delete the current collage?",
+                CloseButtonText = "No",
+                PrimaryButtonText = "Yes",
+            };
 
-            image.ManipulationDelta +=
-                new ManipulationDeltaEventHandler(this.Image_ManipulationDelta);
+            ContentDialogResult contentDialogResult = await deleteCollageDialog.ShowAsync();
 
-            // Create a transformation to be used to apply them to the image.
-            // Reference: https://github.com/microsoft/Windows-universal-samples/blob/master/Samples/BasicInput/cs/4-XAMLManipulations.xaml.cs
-            this.imagesTransforms[image.Name] = new CompositeTransform();
-            image.RenderTransform = this.imagesTransforms[image.Name];
+            if (contentDialogResult != ContentDialogResult.Primary)
+            {
+                return;
+            }
 
-            // Set the transformation to affect the centre of the image.
-            image.RenderTransformOrigin = new Point(0.5, 0.5);
-
-            image.DoubleTapped += new DoubleTappedEventHandler(this.Image_DoubleTapped);
+            // Clear the images from the canvas.
+            this.images.Clear();
+            this.imagesTransforms.Clear();
+            this.CollageCanvas.Children.Clear();
         }
 
         /// <summary>
