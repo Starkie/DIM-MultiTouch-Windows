@@ -124,6 +124,7 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\LoadPhotoService.cs" />
     <Compile Include="Services\SavePhotoService.cs" />
   </ItemGroup>
   <ItemGroup>

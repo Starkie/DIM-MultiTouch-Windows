@@ -2,12 +2,9 @@ namespace Dim.MultiTouch.Collage
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using Dim.MultiTouch.Collage.Service;
+    using Dim.MultiTouch.Collage.Services;
     using Windows.Foundation;
-    using Windows.Storage;
-    using Windows.Storage.Pickers;
-    using Windows.UI.ViewManagement;
     using Windows.UI.Xaml;
     using Windows.UI.Xaml.Controls;
     using Windows.UI.Xaml.Input;
@@ -20,6 +17,7 @@ namespace Dim.MultiTouch.Collage
     public sealed partial class MainPage : Page
     {
         private readonly SavePhotoService saveAsPhotoService;
+        private readonly LoadPhotoService loadPhotoService;
 
         private readonly Dictionary<string, Image> images;
         private readonly Dictionary<string, CompositeTransform> imagesTransforms;
@@ -30,6 +28,7 @@ namespace Dim.MultiTouch.Collage
             this.InitializeComponent();
 
             this.saveAsPhotoService = new SavePhotoService();
+            this.loadPhotoService = new LoadPhotoService();
 
             this.SaveButton.Click += new RoutedEventHandler(this.SaveClick_OnClickAsync);
             this.AddButton.Click += new RoutedEventHandler(this.AddClick_OnClickAsync);
@@ -91,52 +90,25 @@ namespace Dim.MultiTouch.Collage
         /// <param name="e"> The event arguments. </param>
         private async void AddClick_OnClickAsync(object sender, RoutedEventArgs e)
         {
-            IReadOnlyList<StorageFile> selectedImages = await ShowImageFileSelector();
+            IEnumerable<BitmapImage> loadedImages = await this.loadPhotoService.SelectAndLoadPhotosAsync();
 
-            foreach (var file in selectedImages)
+            // Add the loaded images to the canvas.
+            foreach (BitmapImage bitmap in loadedImages)
             {
-                using (var fileStream = await file.OpenReadAsync())
-                {
-                    BitmapImage bitmap = new BitmapImage();
-                    await bitmap.SetSourceAsync(fileStream);
+                Image image = new Image();
+                image.Name = Guid.NewGuid().ToString();
+                image.Source = bitmap;
+                image.Stretch = Stretch.Uniform;
 
-                    Image image = new Image();
-                    image.Name = Guid.NewGuid().ToString();
-                    image.Source = bitmap;
-                    image.Stretch = Stretch.Uniform;
+                image.CenterPoint = this.CollageCanvas.CenterPoint;
 
-                    image.CenterPoint = this.CollageCanvas.CenterPoint;
-
-                    this.images[image.Name] = image;
-
-                    this.SetDefaultImageConfiguration(image);
-
-                    this.CollageCanvas.Children.Add(image);
-                }
+                // Register the loaded image.
+                this.images[image.Name] = image;
+                this.SetDefaultImageConfiguration(image);
+                this.CollageCanvas.Children.Add(image);
             }
 
             this.CollageCanvas.UpdateLayout();
-        }
-
-        /// <summary> Shows the file selector to pick one or more images. </summary>
-        /// <returns> The collection of selected files, if any. </returns>
-        private static async Task<IReadOnlyList<StorageFile>> ShowImageFileSelector()
-        {
-            // Ensure that the application is not snapped, to avoid errors.
-            // See: https://docs.microsoft.com/en-us/windows/uwp/files/quickstart-save-a-file-with-a-picker
-            bool unsnapped = (ApplicationView.Value != ApplicationViewState.Snapped) || ApplicationView.TryUnsnap();
-
-            FileOpenPicker fileOpenPicker = new FileOpenPicker();
-
-            // Image extension filters.
-            fileOpenPicker.FileTypeFilter.Add(".png");
-            fileOpenPicker.FileTypeFilter.Add(".jpg");
-            fileOpenPicker.FileTypeFilter.Add(".jpeg");
-
-            fileOpenPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
-
-            IReadOnlyList<StorageFile> selectedImages = await fileOpenPicker.PickMultipleFilesAsync();
-            return selectedImages;
         }
 
         /// <summary> Stores the current collage as photo in the disk. </summary>
