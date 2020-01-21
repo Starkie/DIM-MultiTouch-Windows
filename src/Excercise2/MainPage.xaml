@@ -13,9 +13,7 @@
             <Image x:Name="Photo" Source="/Assets/forest.jpg" MaxHeight="400" Holding="Photo_Holding" DoubleTapped="Photo_DoubleTapped" Tapped="Photo_Tapped" />
         </StackPanel>
         <StackPanel x:Name="EventsPanel" Margin="20" RelativePanel.RightOf="ImagePanel">
-            <ListView x:Name="EventsListView" Header="Touch Events">
-                <x:String>string</x:String>
-            </ListView>
+            <ListView x:Name="EventsListView" Header="Touch Events" />
         </StackPanel>
     </RelativePanel>
 </Page>
