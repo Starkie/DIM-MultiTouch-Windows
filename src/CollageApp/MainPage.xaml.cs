@@ -9,6 +9,7 @@ namespace Dim.MultiTouch.Collage
     using Windows.Graphics.Imaging;
     using Windows.Storage;
     using Windows.Storage.Pickers;
+    using Windows.Storage.Streams;
     using Windows.UI.ViewManagement;
     using Windows.UI.Xaml;
     using Windows.UI.Xaml.Controls;
@@ -43,6 +44,11 @@ namespace Dim.MultiTouch.Collage
             {
                 this.SetDefaultImageTransformation(image);
             }
+
+            // Do not render anything outside the canvas bounds.
+            Rect r = new Rect(new Point(0, 0), new Point(this.CollageCanvas.MaxWidth, this.CollageCanvas.MaxHeight));
+
+            this.CollageCanvas.Clip = new RectangleGeometry { Rect = r };
         }
 
         /// <summary>
@@ -83,9 +89,9 @@ namespace Dim.MultiTouch.Collage
             // darle tamaño fijo?
 
             // Write the result as a PNG image.
-            using (var stream = await file.OpenAsync(FileAccessMode.ReadWrite))
+            using (IRandomAccessStream fileStream = await file.OpenAsync(FileAccessMode.ReadWrite))
             {
-                BitmapEncoder bitmapEncoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, stream);
+                BitmapEncoder bitmapEncoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, fileStream);
                 bitmapEncoder.SetPixelData(
                     BitmapPixelFormat.Bgra8,
                     BitmapAlphaMode.Premultiplied,
@@ -160,7 +166,7 @@ namespace Dim.MultiTouch.Collage
                 return;
             }
 
-            await SaveViewAsImageFileAsync(this, file);
+            await SaveViewAsImageFileAsync(this.CollageCanvas, file);
         }
 
         private void SetDefaultImageTransformation(Image image)
