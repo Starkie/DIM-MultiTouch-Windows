@@ -2,6 +2,7 @@ namespace Dim.MultiTouch.Collage
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Runtime.InteropServices.WindowsRuntime;
     using System.Threading.Tasks;
     using Windows.Foundation;
@@ -32,6 +33,7 @@ namespace Dim.MultiTouch.Collage
 
             this.SaveButton.Click += new RoutedEventHandler(this.SaveClick_OnClickAsync);
             this.AddButton.Click += new RoutedEventHandler(this.AddClick_OnClickAsync);
+            this.DeleteButton.Click += new RoutedEventHandler(this.DeleteButton_OnClickAsync);
 
             this.images = new Dictionary<string, Image>();
             this.images[this.ForestPhoto.Name] = this.ForestPhoto;
@@ -49,6 +51,35 @@ namespace Dim.MultiTouch.Collage
             Rect r = new Rect(new Point(0, 0), new Point(this.CollageCanvas.MaxWidth, this.CollageCanvas.MaxHeight));
 
             this.CollageCanvas.Clip = new RectangleGeometry { Rect = r };
+        }
+
+        /// <summary>
+        ///     Event handler for the <see cref="DeleteButton"/>. Prompts the user to delete all the
+        ///     images of the collage.
+        /// </summary>
+        /// <param name="sender"> The button. </param>
+        /// <param name="e"> The event arguments. </param>
+        private async void DeleteButton_OnClickAsync(object sender, RoutedEventArgs e)
+        {
+            ContentDialog deleteCollageDialog = new ContentDialog
+            {
+                Title = "Delete current collage",
+                Content = "Are you sure you want to delete the current collage?",
+                CloseButtonText = "No",
+                PrimaryButtonText = "Yes",
+            };
+
+            ContentDialogResult contentDialogResult = await deleteCollageDialog.ShowAsync();
+
+            if (contentDialogResult != ContentDialogResult.Primary)
+            {
+                return;
+            }
+
+            // Clear the images from the canvas.
+            this.images.Clear();
+            this.imagesTransforms.Clear();
+            this.CollageCanvas.Children.Clear();
         }
 
         /// <summary>
