@@ -2,15 +2,11 @@ namespace Dim.MultiTouch.Collage
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Runtime.InteropServices.WindowsRuntime;
     using System.Threading.Tasks;
+    using Dim.MultiTouch.Collage.Service;
     using Windows.Foundation;
-    using Windows.Graphics.Display;
-    using Windows.Graphics.Imaging;
     using Windows.Storage;
     using Windows.Storage.Pickers;
-    using Windows.Storage.Streams;
     using Windows.UI.ViewManagement;
     using Windows.UI.Xaml;
     using Windows.UI.Xaml.Controls;
@@ -23,6 +19,8 @@ namespace Dim.MultiTouch.Collage
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private readonly SavePhotoService saveAsPhotoService;
+
         private readonly Dictionary<string, Image> images;
         private readonly Dictionary<string, CompositeTransform> imagesTransforms;
 
@@ -30,6 +28,8 @@ namespace Dim.MultiTouch.Collage
         public MainPage()
         {
             this.InitializeComponent();
+
+            this.saveAsPhotoService = new SavePhotoService();
 
             this.SaveButton.Click += new RoutedEventHandler(this.SaveClick_OnClickAsync);
             this.AddButton.Click += new RoutedEventHandler(this.AddClick_OnClickAsync);
@@ -81,57 +81,6 @@ namespace Dim.MultiTouch.Collage
             this.images.Clear();
             this.imagesTransforms.Clear();
             this.CollageCanvas.Children.Clear();
-        }
-
-        /// <summary>
-        ///     Shows the 'Save File' dialog and returns the resulting file. Returns null if the
-        ///     operation was cancelled.
-        /// </summary>
-        /// <returns>
-        ///     A task that contains the result of selecting the file and that enables this method
-        ///     to be awaited.
-        /// </returns>
-        private static async Task<StorageFile> ShowSaveFileDialogAsync()
-        {
-            // Ensure that the application is not snapped, to avoid errors.
-            // See: https://docs.microsoft.com/en-us/windows/uwp/files/quickstart-save-a-file-with-a-picker
-            bool unsnapped = (ApplicationView.Value != ApplicationViewState.Snapped) || ApplicationView.TryUnsnap();
-
-            FileSavePicker savePicker = new FileSavePicker();
-
-            savePicker.FileTypeChoices.Add("Image", new List<string>() { ".png" });
-            savePicker.SuggestedFileName = DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + "-Collage";
-            savePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
-
-            StorageFile file = await savePicker.PickSaveFileAsync();
-
-            return file;
-        }
-
-        private static async Task SaveViewAsImageFileAsync(UIElement uiElement, StorageFile file)
-        {
-            // Render the current view to the target bitmap. Reference from: https://stackoverflow.com/questions/41354024/uwp-save-grid-as-png
-            RenderTargetBitmap renderTargetBitmap = new RenderTargetBitmap();
-            await renderTargetBitmap.RenderAsync(uiElement);
-
-            // Obtain the pixels from the rendered bitmap
-            byte[] pixels = (await renderTargetBitmap.GetPixelsAsync()).ToArray();
-
-            // Write the result as a PNG image.
-            using (IRandomAccessStream fileStream = await file.OpenAsync(FileAccessMode.ReadWrite))
-            {
-                BitmapEncoder bitmapEncoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, fileStream);
-                bitmapEncoder.SetPixelData(
-                    BitmapPixelFormat.Bgra8,
-                    BitmapAlphaMode.Premultiplied,
-                    (uint)renderTargetBitmap.PixelWidth,
-                    (uint)renderTargetBitmap.PixelHeight,
-                    DisplayInformation.GetForCurrentView().RawDpiX,
-                    DisplayInformation.GetForCurrentView().RawDpiY,
-                    pixels);
-
-                await bitmapEncoder.FlushAsync();
-            }
         }
 
         /// <summary>
@@ -195,15 +144,7 @@ namespace Dim.MultiTouch.Collage
         /// <param name="e"> The arguments regarding the click. </param>
         private async void SaveClick_OnClickAsync(object sender, RoutedEventArgs e)
         {
-            StorageFile file = await ShowSaveFileDialogAsync();
-
-            if (file == null)
-            {
-                // The operation was cancelled.
-                return;
-            }
-
-            await SaveViewAsImageFileAsync(this.CollageCanvas, file);
+            await this.saveAsPhotoService.SaveUiElementToFile(this.CollageCanvas);
         }
 
         /// <summary>
