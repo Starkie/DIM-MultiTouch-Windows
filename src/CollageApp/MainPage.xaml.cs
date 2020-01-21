@@ -261,13 +261,15 @@ namespace Dim.MultiTouch.Collage
             Image image = sender as Image;
 
             // Apply the delta transformations to the Image.
-            this.imagesTransforms[image.Name].Rotation += e.Delta.Rotation;
+            CompositeTransform transform = this.imagesTransforms[image.Name];
 
-            this.imagesTransforms[image.Name].ScaleX *= e.Delta.Scale;
-            this.imagesTransforms[image.Name].ScaleY *= e.Delta.Scale;
+            transform.Rotation += e.Delta.Rotation;
 
-            this.imagesTransforms[image.Name].TranslateX += e.Delta.Translation.X;
-            this.imagesTransforms[image.Name].TranslateY += e.Delta.Translation.Y;
+            transform.ScaleX *= e.Delta.Scale;
+            transform.ScaleY *= e.Delta.Scale;
+
+            transform.TranslateX += e.Delta.Translation.X;
+            transform.TranslateY += e.Delta.Translation.Y;
         }
     }
 }
