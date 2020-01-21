@@ -79,6 +79,9 @@ namespace Dim.MultiTouch.Collage
             // Obtain the pixels from the rendered bitmap
             byte[] pixels = (await renderTargetBitmap.GetPixelsAsync()).ToArray();
 
+            // TODO: See how to save only the visible side of the canvas. Evitar que sea stretch y
+            // darle tamaño fijo?
+
             // Write the result as a PNG image.
             using (var stream = await file.OpenAsync(FileAccessMode.ReadWrite))
             {
@@ -184,11 +187,15 @@ namespace Dim.MultiTouch.Collage
 
         private void Image_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
-            // Delete the image when double taped.
+            // Move the image to front when double taped.
             Image image = sender as Image;
-            this.images[image.Name] = null;
-            this.imagesTransforms[image.Name] = null;
-            this.CollageCanvas.Children.Remove(image);
+
+            int index = this.CollageCanvas.Children.IndexOf(image);
+
+            if (index != -1)
+            {
+                this.CollageCanvas.Children.Move((uint)index, (uint)this.CollageCanvas.Children.Count - 1);
+            }
         }
 
         private void Photo_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
